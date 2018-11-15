@@ -7,18 +7,23 @@ namespace Guti.FileCompression
 {
     public class FileServices
     {
-        private static readonly string pathTemporal = @"c:\Guti.FileCompression\Compress";
-        private static readonly string compressionBase = @"c:\Guti.FileCompression\";
-        //private static readonly string archivoDePeueba = @"C:\Users\rgutierrez\Desktop\Imágenes\home-slide-02.jpg";
-        private static readonly string archivoDePeueba = @"C:\Guti.FileCompression\Prueba.html";
-
-        private static void CreatePaths()
+        private static void CreatePaths(string pathTemporal, string compressionBase)
         {
             Directory.CreateDirectory(pathTemporal);
             Directory.CreateDirectory(compressionBase);
         }
 
-        public static string GenerarRandomName(int numChars)
+        public static void DeleteFiles(DirectoryInfo directory)
+        {
+            //delete files:
+            foreach (System.IO.FileInfo file in directory.GetFiles())
+                file.Delete();
+            //delete directories in this directory:
+            foreach (System.IO.DirectoryInfo subDirectory in directory.GetDirectories())
+                directory.Delete(true);
+        }
+
+        public static string GenerarRandomCode(int numChars)
         {
             string s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             Random r = new Random();
@@ -32,21 +37,40 @@ namespace Guti.FileCompression
             return sb.ToString();
         }
 
-        public static void CompressFile()
+        public static string GetUniqueName()
         {
-            CreatePaths();
+            return DateTime.Now.Ticks.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath">Ruta al archivo a comprimir</param>
+        /// <param name="compressedFileDestination">Ruta de destino para el archivo comprimido</param>
+        /// <param name="temporalPath">Carpeta temporal en donde se comprimirá el archivo</param>
+        /// <param name="deleteOriginal">Si true borra el archivo original</param>
+        public static void CompressFile(string filePath, string compressedFileDestination, string temporalPath, bool deleteOriginal)
+        {
+            Directory.CreateDirectory(temporalPath);
+            Directory.CreateDirectory(compressedFileDestination);
+
+            //Vaciar la carpeta temporal
+            DeleteFiles(new DirectoryInfo(temporalPath));
+
             //Copiar archivo a la carpeta temporal
-            File.Copy(archivoDePeueba, Path.Combine(pathTemporal, Path.GetFileName(archivoDePeueba)));
+            File.Copy(filePath, Path.Combine(temporalPath, Path.GetFileName(filePath)));
+            
             //Comprimir
-            string zipPath = Path.Combine(compressionBase, $"{GenerarRandomName(10)}.zip");
-            ZipFile.CreateFromDirectory(pathTemporal, zipPath, CompressionLevel.Optimal, false);
+            string zipPath = Path.Combine(compressedFileDestination, $"{GetUniqueName()}.zip");
+            ZipFile.CreateFromDirectory(temporalPath, zipPath, CompressionLevel.Optimal, false);
 
             //Borrar archivo de la carpeta temporal
-            File.Delete(Path.Combine(pathTemporal, Path.GetFileName(archivoDePeueba)));
+            File.Delete(Path.Combine(temporalPath, Path.GetFileName(filePath)));
 
-            //string extractPath = @"c:\example\extract";
-
-            //ZipFile.ExtractToDirectory(zipPath, extractPath);
+            if (deleteOriginal)
+            {
+                File.Delete(filePath);
+            }
         }
     }
 }
