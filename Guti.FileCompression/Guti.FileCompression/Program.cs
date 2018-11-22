@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Guti.FileCompression
 {
@@ -18,7 +14,11 @@ namespace Guti.FileCompression
         {
             try
             {
-                FileServices.CompressFile(archivoDePrueba, compressionBase, pathTemporal, true);
+                //FileServices.CompressFile(archivoDePrueba, compressionBase, pathTemporal, true);
+                string message = FileServices.CompressFileGzip(archivoDePrueba, compressionBase, false);
+                Console.WriteLine("Archivo comprimido en: {0}", message);
+                //FileServices.CompressFileDeflate(archivoDePrueba);
+
                 Console.WriteLine("Archivo comprimido exitosamente");
                 Console.ReadLine();
             }
